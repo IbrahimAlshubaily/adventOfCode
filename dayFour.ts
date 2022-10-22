@@ -7,21 +7,22 @@ const parseBoard = (board: string): number[][] => {
     });
 }
 
-const isBingo = (calledNums: number[], boards: number[][][]): number => {
+const isBingo = (calledNums: number[], boards: number[][][]): number[] => {
     const isHit = (value : number) => calledNums.includes(value);
+    let hits: number[] = [];
     for (let i = 0; i < boards.length; i++) {
         for(let j = 0; j < boards[i].length; j++) {
             if (boards[i][j].every(isHit)) {
-                return i;
+                hits.push(i);
             }
             if (boards[i].map((value, _) => value[j]).every(isHit)){
-                return i;
+                hits.push(i);
             }
         }
         
 
     }
-    return -1;
+    return hits;
 }
 const dayThree = (): number =>  {
 
@@ -33,15 +34,23 @@ const dayThree = (): number =>  {
     }
 
     const calledNums : number[] = [];
+    let lastBingo = -1;
+    const hits: Set<number> = new Set();
     for (let i = 0; i < numberStream.length; i++) {
         calledNums.push(numberStream[i]);
         const bingoIdx = isBingo(calledNums, boards);
-        if (bingoIdx > 0) {
-            return numberStream[i] * boards[bingoIdx].flat().filter(v => !calledNums.includes(v)).reduce((sum, curr) => sum + curr);
+        if (bingoIdx.length > 0) {
+            for (let idx  = 0; idx < bingoIdx.length; idx++) {
+                if (hits.has(bingoIdx[idx])) continue;
+                hits.add(bingoIdx[idx]);
+                const boardVal = boards[bingoIdx[idx]].flat().filter(v => !calledNums.includes(v)).reduce((sum, curr) => sum + curr);
+                lastBingo = numberStream[i] * boardVal;
+            }
+
         }
         
     }
-    return -1;
+    return lastBingo;
     
 }
 console.log(dayThree());
