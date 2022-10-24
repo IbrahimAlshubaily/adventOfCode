@@ -45,13 +45,14 @@ const count = (p : point) : number => {
             out+=1
         } else if (p.y === val.p1.y && p.y === val.p2.y && p.x >= minX && p.x <= maxX ) {
             out+=1
-        }
+        } 
         
         if (out > 2) return out;
     }
     out > 0 ? console.log(out): null
     return out;
 }
+
 
 const getPoint = (lines: line[], proc: Function): point =>  {
     let [minX, minY] = proc === Math.min ? [1e+9, 1e+9] : [-1, -1];
@@ -62,17 +63,50 @@ const getPoint = (lines: line[], proc: Function): point =>  {
     return {x: minX, y: minY};
 }
 
-let result = 0;
+const getGrid = () => {
+    const minPoint = getPoint(lines, Math.min);
+    const maxPoint = getPoint(lines, Math.max);
+    const n = 1000;
+    const grid : number[][] = Array(n);
+    for (let i = 0; i < n; i++) {
+        grid[i] = Array(1000).fill(0);
+    }
+    
+    
+    lines.forEach((line, _) => {
+        const [p1, p2] = [line.p1, line.p2];
 
-const minPoint = getPoint(lines, Math.min);
-const maxPoint = getPoint(lines, Math.max);
-for (let x = minPoint.x; x < maxPoint.x; x++) {
-    for (let y = minPoint.y; y < maxPoint.y; y++) {
-        const numLines = count({x ,y})
-        if (numLines > 1) {
-            console.log(numLines, '---')
-            result++;
+        const offset = (a:number, b: number): number => {
+            let d = 0;
+            if (a < b) {
+                d = 1
+            } else if (a > b) {
+                d = -1;
+            }
+            return d;
+        }
+
+        const dx = offset(p1.x, p2.x)
+        const dy = offset(p1.y, p2.y)
+        grid[p1.x][p1.y]++;
+        while (p1.x !== p2.x || p1.y !== p2.y){
+            p1.x += dx;
+            p1.y += dy;
+            grid[p1.x][p1.y]++;
+        }
+    })
+
+    let result = 0;
+    for (let i = 0; i < n; i++) {
+        for (let j = 0; j < n; j++) {
+            if (grid[i][j] > 1){
+                result++;
+            }
         }
     }
+    return result;
+
+
 }
-console.log(result)
+957201
+console.log(getGrid())
